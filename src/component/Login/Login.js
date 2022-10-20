@@ -1,11 +1,12 @@
 import  {useRef, useState, useEffect} from 'react';
+import axios from "axios";
 
 const Login = () => {
     const userRef = useRef();
     const errRef = useRef();
 
-    const [user, setUser] = useState('');
-    const [pwd, setPwd] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -15,21 +16,36 @@ const Login = () => {
 
     useEffect(() => {
         setErrMsg('');
-    }, [user, pwd])
+    }, [email, password])
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(user, pwd);
-        setUser('');
-        setPwd('');
-        setSuccess(true);
+        const Etudiant = { email, password };
+        const res = await axios.post(`http://127.0.0.1:8000/api/auth/login`, Etudiant).catch((error)=>{
+          if (error.response) {
+            console.log(error.response)
+          }
+        });
+        if (email) {
+            setEmail('');
+        };
+        
+        if (password) {
+            setPwd('');
+        };
+        
+        if (res) {
+            setSuccess(true)
+            console.log(email, password);
+        };
     }
 
     return (
         <>
             {success ? (
                 <section>
-                    <h1> You are logged in !</h1>
+                    <h1> You are logged in!</h1>
                     <br />
                     <p>
                         <a href="#">
@@ -42,14 +58,14 @@ const Login = () => {
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg} </p>
             <h1> Sign in </h1>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="username"> Username : </label>
+                <label htmlFor="username"> Email : </label>
                 <input
                     type="text"
                     id="username"
                     ref={userRef}
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                     required
                 />
                 <label htmlFor="password"> Password : </label>
@@ -57,7 +73,7 @@ const Login = () => {
                     type="password"
                     id="password"
                     onChange={(e) => setPwd(e.target.value)}
-                    value={pwd}
+                    value={password}
                     required
                 />
                 <button>Sign In</button>
